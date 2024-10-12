@@ -50,8 +50,21 @@ const server = http.createServer(async (request, response) => {
             }
         }
     }
+    if (urls.pathname == "/main.jpg"){
+        response.writeHead(200, {
+            "Content-Type": "image/jpg; charset=utf-8"
+        });
+        message = file.readFileSync("./templates/main.jpg", "binary");
+        response.end(message, "binary");
+        return;
+    }
+    if (typeof request.headers.cookie == "undefined" || request.headers.cookie.indexOf("gz") == -1 && ( request.headers.cookie.split(";").map((a) => a.split("=")).find((i) => i == "gz") != "undefined" && request.headers.cookie.split(";").map((a) => a.split("=")).find((i) => i[0] == "gz")[1] != "ok")){
+        message = returnTemplate("./templates/gizou.html", {});
+        response.end(message);
+        return;
+    }
     if (request.url == undefined){
-        message = returnTemplate("./templates/error/404.html", {requesturl:"undefined"}, 404);
+        message = returnTemplate("./templates/error/404.html", {requesturl:"undefined"});
     } else {
         switch(urls.pathname){
             case "/":
@@ -149,7 +162,7 @@ const server = http.createServer(async (request, response) => {
     }
     response.end(message);
 });
-async function fetchapi(urls, type="json"){
+async function fetchapi(urls){
     try{
         async function fetchCore(url) {
             let option = {};
