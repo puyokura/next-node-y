@@ -1,5 +1,4 @@
 <!DOCTYPE HTML>
-{{! 降ってくる内容：returnedの中にrunした結果が入ってる}}
 <head>
     <meta charset="UTF-8">
     <title>200なんよ</title>
@@ -66,6 +65,14 @@
                         音質：<select type="dropdown" id="aq"></select><br>
                         <button onClick="hozon()">保存</button>※リロードされます
                     </span>
+                </div>
+                <div class="fixed-search">
+                    <div class="search-padding">
+                        <form onsubmit="return send(event)">
+                            <input type="text" id="search" placeholder="検索...">
+                        </form>
+                        <span id="suggest"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,5 +145,36 @@
         clearTimeout(playb);
         vid.pause();
         aud.pause();
+    }
+    let di = (c) => {return d.getElementById(c)};
+    let sug = di("suggest");
+    let spsearch;
+    let search = di("search");
+    setInterval(function(){
+        if (spsearch != search.value){
+            spsearch = search.value;
+            suggest();
+        }
+    }, 200);
+    function send(e){
+        e.preventDefault();
+        location.href = `./search?q=${search.value}&page=1`;
+    }
+    async function suggest(){
+        let suggestthing;
+        await fetch("/suggest?q="+search.value).then((r) => r.json()).then((p) => {suggestthing = p});
+        sug.innerHTML = "";
+        suggestthing.forEach(e => {
+            let button = d.createElement("button");
+            button.className += "btn btn-outline-success";
+            button.setAttribute("onclick", "setvalue(event);");
+            button.innerText = e;
+            sug.appendChild(button);
+        });
+        search.focus();
+    }
+    function setvalue(e){
+            search.value = e.target.innerHTML;
+            sug.innerHTML = "";
     }
 </script>
