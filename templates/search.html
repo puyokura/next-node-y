@@ -80,6 +80,10 @@
     }, 200);
     function send(e){
         e.preventDefault();
+        if (search.value == "/@keiji"){
+            location.href="./keiji.html";
+            return;
+        }
         location.href = `./search?q=${search.value}&page=1`;
     }
     async function suggest(){
