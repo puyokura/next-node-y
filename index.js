@@ -36,6 +36,8 @@ let apis = ["https://invidious.private.coffee/","https://invidious.protokolla.fi
     })
     .catch((e) => {console.error(e)});
 
+let dt_post = new Array();
+dt_post["keiji_send"] = "";
 const server = http.createServer(async (request, response) => {
     let message;
     let urls = new URL(`http://${process.env.HOST ?? 'localhost'}${request.url}`);
@@ -62,6 +64,40 @@ const server = http.createServer(async (request, response) => {
         message = returnTemplate("./templates/gizou.html", {});
         response.end(message);
         return;
+    }
+    if (request.method == "POST"){
+        switch(urls.pathname){
+            case "/writekeiji.php":
+                return postdata_get("keiji_send");
+                break;
+            default:
+                response.writeHead(400, {
+                    "Content-Type": "text/html"
+                });
+                response.end("<h1>400 Bad request</h1>");
+                break;
+        }
+        function postdata_get(arrname){
+            dt_post[arrname] = "";
+            request.on('data', function (data) {
+                dt_post[arrname] += data;
+            });
+            request.on('end', async function () {
+                response.writeHead(200, {
+                    "Content-Type": "text/html"
+                });
+                let resp;
+                switch(arrname){
+                    case "keiji_send":
+                        await fetch("https://keiji.jf6deu.net/writekeiji.php", {method:"POST", headers: {'Content-type':'application/json'}, body:dt_post[arrname]})
+                            .then((r) => r.text())
+                            .then((r) => {resp = r})
+                            .catch((e) => console.error(e));
+                }
+                response.end(resp);
+            });
+            return;
+        }
     }
     if (request.url == undefined){
         message = returnTemplate("./templates/error/404.html", {requesturl:"undefined"});
@@ -157,6 +193,18 @@ const server = http.createServer(async (request, response) => {
                     }
                     message = returnTemplate("./templates/watch.html", {formats: outform});
                 }
+                break;
+            case "/keiji.html":
+                message = returnTemplate("./templates/keiji.html", {});
+                break;
+            case "/outjson.php":
+                    response.writeHead(200, {
+                        "Content-Type": "application/json"
+                    });
+                await fetch("https://keiji.jf6deu.net/outjson.php")
+                    .then((r) => r.text())
+                    .then((r) => {message = r})
+                    .catch((e) => console.error(e));
                 break;
             default:
                 response.writeHead(404, {
