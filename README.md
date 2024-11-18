@@ -10,6 +10,10 @@
 
 掲示板のID/PWは[こちら](https://forms.gle/pdjX5HhZNx2ZQqpU6)から作成できます。
 
+入るためのパスワードは[passsend.jf6deu.net](https://passsend.jf6deu.net/)から入手できます。
+
+使い方は[こちらのScratch](https://scratch.mit.edu/projects/1081970754)に詳しく載っています。
+
 # デプロイ方法
 
 いまのところrenderしか対応してないけど
