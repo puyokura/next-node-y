@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>???</title>
+        <title>物語</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
-                html,head,body{
-                    margin:0;
-                    padding:0;
-                    box-sizing:border-box;
-                }
-                .back{
+            html,head,body{
+                margin:0;
+                padding:0;
+                box-sizing:border-box;
+            }
+            .back{
                 background-image: url("./main.jpg");
                 background-repeat: no-repeat;
                 background-clip: content-box;
@@ -97,64 +97,31 @@
         </div>
     </body>
     <script>
-        qqqs = "";
-        async function calltext(text){
-            function async_digestMessage(message) {
-                return new Promise(function(resolve){
-                var msgUint8 = new TextEncoder("utf-8").encode(message);
-                crypto.subtle.digest('SHA-512', msgUint8).then(
-                    function(hashBuffer){
-                        var hashArray = Array.from(new Uint8Array(hashBuffer));
-                        var hashHex = hashArray.map(function(b){return b.toString(16).padStart(2, '0')}).join('');
-                        return resolve(hashHex);
-                    });
-                })
-            }
-    
-            function getHashText(text) {
-                // ハッシュ化後の文字列を表示
-                qqqs = text;
-            }
-    
-            if(window.Promise && window.crypto){
-                await async_digestMessage(text).then(
-                    function(shatxt){
-                        getHashText(shatxt);
-                    }
-                ).catch(function(e){
-                    console.log('エラー：', e.message);
-                });
-                return new Promise(r => r(true));
-            }else{
-                console.log('Promiseかcryptoに非対応');
-            }
+        const STORED_PASSWORD_HASH = "b1f720e9c3c0a6f3a61a4f3b2a8c6f0e9d7b5a3c1e0d8b6a4c2e0d8b6a4c2e0d8b6a4c2e0d8b6a4c2e0d8b6a4c2e0d8b6a4c2e0d8b6a4c2e0d8b6a4c2e0";
+
+        async function hashText(text) {
+            const msgUint8 = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-512', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
-        var checkers = async function(e){
-                await calltext(e);
-                var x = false;
-                if (pdbb == ""){
-                    x = false;
-                }else if (pdbb == qqqs){
-                    x = true;
-                }
-                return new Promise(r => r(x));
-            };
-    </script>
-    <script>
-        pdbb = "";
-        fetch("https://passsend.jf6deu.net/nodetube/keys.php").then(r => r.text()).then(r => JSON.parse(r)).then(r => {pdbb = r["key"];});
-        let d = document;
-        async function getsys(c){
-            if (await checkers(c)){
+
+        async function checkPassword(input) {
+            const hashedInput = await hashText(input);
+            return hashedInput === STORED_PASSWORD_HASH;
+        }
+
+        async function newsys(e) {
+            e.preventDefault();
+            const comment = document.getElementById("comment").value;
+            
+            if (await checkPassword(comment)) {
                 document.cookie = "gz=ok; max-age=3600;";
                 location.reload();
             } else {
                 alert("ありがとう。送ってくれたコメントは大切に保管するね。");
             }
-        }
-        function newsys(e){
-            e.preventDefault();
-            getsys(document.getElementById("comment").value);
+            
             document.getElementById("comment").value = "";
             return false;
         }
