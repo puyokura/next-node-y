@@ -110,45 +110,64 @@
         const search = di("search");
         let spsearch;
 
-        setInterval(function(){
-            if (spsearch != search.value){
-                spsearch = search.value;
-                suggest();
-            }
-        }, 200);
+        // モックデータ（実際のアプリケーションではAPIから取得）
+        const mockSuggestions = [
+            "next.js", "node.js", "react", "typescript", "javascript",
+            "vue.js", "angular", "express", "mongodb", "postgresql"
+        ];
 
-        function send(e){
+        search.addEventListener('input', debounce(suggest, 200));
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function send(e) {
             e.preventDefault();
-            if (search.value == "/@keiji"){
+            console.log("送信処理開始");
+            if (search.value == "/@keiji") {
+                console.log("/@keijiへ遷移");
                 location.href = "./keiji.html";
                 return;
             }
+            console.log(`検索ページへ遷移: ${search.value}`);
             location.href = `./search?q=${encodeURIComponent(search.value)}&page=1`;
         }
 
-        async function suggest(){
-            if (!search.value.trim()) {
+        function suggest() {
+            console.log("サジェスト処理開始");
+            const query = search.value.toLowerCase().trim();
+            if (!query) {
                 sug.innerHTML = "";
                 return;
             }
 
-            try {
-                const response = await fetch("/api/suggest?q=" + encodeURIComponent(search.value));
-                const suggestthing = await response.json();
-                sug.innerHTML = "";
-                suggestthing.forEach(e => {
-                    let button = d.createElement("button");
-                    button.setAttribute("onclick", "setvalue(event);");
-                    button.innerText = e;
-                    sug.appendChild(button);
-                });
-            } catch (error) {
-                console.error('Error fetching suggestions:', error);
-            }
-            search.focus();
+            // モックデータを使用してサジェストを生成
+            const suggestthing = mockSuggestions.filter(item => 
+                item.toLowerCase().includes(query)
+            ).slice(0, 5);
+
+            console.log("サジェスト結果:", suggestthing);
+
+            sug.innerHTML = "";
+            suggestthing.forEach(e => {
+                let button = d.createElement("button");
+                button.setAttribute("onclick", "setvalue(event);");
+                button.innerText = e;
+                sug.appendChild(button);
+            });
         }
 
-        function setvalue(e){
+        function setvalue(e) {
+            console.log("選択されたサジェスト:", e.target.innerHTML);
             search.value = e.target.innerHTML;
             sug.innerHTML = "";
         }
