@@ -1,51 +1,87 @@
 <!DOCTYPE HTML>
-{{! 降ってくる内容：requesturlの中にリクエストされたURLが入ってる}}
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nextnode</title>
-    <link rel="stylesheet" href="./css/reset.css">
     <style>
-        .back{
-            position:fixed;
-            width:100%;
-            height:100vh;
-            background: linear-gradient(#fff, #ccc);
-            z-index:-2;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .back-touka{
-            position:fixed;
-            width:100%;
-            height:100vh;
-            z-index:-1;
-            backdrop-filter:blur(4px) brightness(70%);
-            --webkit-backdrop-filter:blur(4px) brightness(70%);
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+        .back {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(#fff, #ccc);
+            z-index: -2;
+        }
+        .back-touka {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            backdrop-filter: blur(4px) brightness(70%);
+            -webkit-backdrop-filter: blur(4px) brightness(70%);
             background-color: rgba(255, 255, 255, 0.2);
         }
-        .center{
-            width: 100vw;
-            display: table-cell;
-            vertical-align: middle;
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
         }
-        .flex{
-            display:flex;
-            justify-content: center;
-        }
-        .searchcontainer{
-            border:1px solid #fff;
+        .searchcontainer {
+            border: 1px solid #fff;
             border-radius: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .box{
-            width:60vw;
-            padding:30px;
-            color:#121212;
+        .box {
+            width: 60vw;
+            max-width: 600px;
+            padding: 30px;
+            color: #121212;
         }
-        .search{
-            width:60vw;
-            height:1.5rem;
+        .box h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
         }
-        .box h1{
-            text-align:center;
+        .search {
+            width: 100%;
+            height: 2rem;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        #suggest {
+            margin-top: 10px;
+        }
+        #suggest button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 5px 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        #suggest button:hover {
+            background-color: #f0f0f0;
+        }
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
         }
     </style>
 </head>
@@ -53,57 +89,70 @@
     <span class="back"></span>
     <span class="back-touka"></span>
     <div class="center">
-        <div class="flex">
-            <div class="searchcontainer">
-                <div class="box">
-                    <h1>next node tube</h1><br>
-                    <form onsubmit="return send(event)">
-                        <input type="text" class="search" id="search" placeholder="検索...">
-                    </form>
-                    <span id="suggest"></span>
-                </div>
+        <div class="searchcontainer">
+            <div class="box">
+                <h1>next node tube</h1>
+                <form onsubmit="return send(event)">
+                    <input type="text" class="search" id="search" placeholder="検索...">
+                </form>
+                <div id="suggest"></div>
             </div>
         </div>
     </div>
-</body>
-<script>
-    const d = document;
-    let di = (c) => {return d.getElementById(c)};
-    let sug = di("suggest");
-    let search = di("search");
-    let spsearch;
-    setInterval(function(){
-        if (spsearch != search.value){
-            spsearch = search.value;
-            suggest();
-        }
-    }, 200);
-    function send(e){
-        e.preventDefault();
-        if (search.value == "/@keiji"){
-            location.href="./keiji.html";
-            return;
-        }
-        location.href = `./search?q=${search.value}&page=1`;
-    }
-    async function suggest(){
-        let suggestthing;
-        await fetch("/suggest?q="+search.value).then((r) => r.json()).then((p) => {suggestthing = p});
-        sug.innerHTML = "";
-        suggestthing.forEach(e => {
-            let button = d.createElement("button");
-            button.setAttribute("onclick", "setvalue(event);");
-            button.innerText = e;
-            sug.appendChild(button);
-        });
-        search.focus();
-    }
-    function setvalue(e){
-        search.value = e.target.innerHTML;
-        sug.innerHTML = "";
-    }
-</script>
-
-    <div style="position: absolute; bottom: 0; right: 0;">
+    <div class="footer">
         arranged by nextgroup
     </div>
+
+    <script>
+        const d = document;
+        const di = (c) => d.getElementById(c);
+        const sug = di("suggest");
+        const search = di("search");
+        let spsearch;
+
+        setInterval(function(){
+            if (spsearch != search.value){
+                spsearch = search.value;
+                suggest();
+            }
+        }, 200);
+
+        function send(e){
+            e.preventDefault();
+            if (search.value == "/@keiji"){
+                location.href = "./keiji.html";
+                return;
+            }
+            location.href = `./search?q=${encodeURIComponent(search.value)}&page=1`;
+        }
+
+        async function suggest(){
+            if (!search.value.trim()) {
+                sug.innerHTML = "";
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/suggest?q=" + encodeURIComponent(search.value));
+                const suggestthing = await response.json();
+                sug.innerHTML = "";
+                suggestthing.forEach(e => {
+                    let button = d.createElement("button");
+                    button.setAttribute("onclick", "setvalue(event);");
+                    button.innerText = e;
+                    sug.appendChild(button);
+                });
+            } catch (error) {
+                console.error('Error fetching suggestions:', error);
+            }
+            search.focus();
+        }
+
+        function setvalue(e){
+            search.value = e.target.innerHTML;
+            sug.innerHTML = "";
+        }
+    </script>
+</body>
+</html>
+
