@@ -5,83 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Next Node Tube</title>
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --background-color: #ecf0f1;
-            --text-color: #34495e;
-        }
-        
         body, html {
             margin: 0;
             padding: 0;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            font-family: Arial, sans-serif;
             height: 100%;
-        }
-        
-        .container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            background-color: #f0f0f0;
         }
         
-        .search-box {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
+        .search-container {
+            text-align: center;
+            background-color: white;
             padding: 2rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             width: 90%;
-            max-width: 500px;
+            max-width: 400px;
         }
         
         h1 {
-            text-align: center;
-            color: var(--secondary-color);
-            margin-bottom: 1.5rem;
-            font-size: 2rem;
-        }
-        
-        .search-form {
-            display: flex;
-            flex-direction: column;
+            margin-bottom: 1rem;
+            color: #333;
         }
         
         .search-input {
-            padding: 0.8rem 1rem;
-            font-size: 1rem;
-            border: 2px solid var(--primary-color);
-            border-radius: 25px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        
-        .search-input:focus {
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         
         #suggest {
-            margin-top: 1rem;
             display: flex;
             flex-wrap: wrap;
+            justify-content: center;
             gap: 0.5rem;
         }
         
         #suggest button {
-            background-color: var(--primary-color);
-            color: white;
+            background-color: #f0f0f0;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 15px;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        #suggest button:hover {
-            background-color: #2980b9;
         }
         
         .footer {
@@ -89,19 +59,17 @@
             bottom: 10px;
             right: 10px;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="search-box">
-            <h1>Next Node Tube</h1>
-            <form onsubmit="return send(event)" class="search-form">
-                <input type="text" class="search-input" id="search" placeholder="検索...">
-            </form>
-            <div id="suggest"></div>
-        </div>
+    <div class="search-container">
+        <h1>Next Node Tube</h1>
+        <form onsubmit="return send(event)">
+            <input type="text" class="search-input" id="search" placeholder="検索...">
+        </form>
+        <div id="suggest"></div>
     </div>
     
     <div class="footer">
